@@ -85,6 +85,14 @@ def optimizerFunction(params, X, Y, Xs):
 
     return -LML
 
+def getRMSE(x1, x2):
+
+    if len(x1) != len(x2):
+        print("Could not compute RMSE: unequal input sizes")
+        return 0
+
+    return np.sqrt(np.sum(cdist(x1, x2, 'seuclidean')) / len(x1))
+
 def getPosteriorPredictive(X, Y, Xs, kernel, jitter):
 
    # Covariance matrices
@@ -92,6 +100,10 @@ def getPosteriorPredictive(X, Y, Xs, kernel, jitter):
     Ks = kernel(X, Xs)
     Kss = kernel(Xs, Xs)
 
+    # If Xs is only a single data point, set Kss to zero
+    if len(Xs) == 1:
+        Kss = np.zeros(1)
+    
     # Cholesky decomposition
     L = np.linalg.cholesky(K + jitter**2 * np.eye(len(X)))
    

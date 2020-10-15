@@ -8,6 +8,13 @@ def getFunctionSample(mu, sigma):
 
 def plotTides(Xs, mu, sigma, t, y, ttrue, ytrue):
 
+    # Plot width and height in inches
+    width, height = 12,6
+    pylab.rcParams['figure.figsize'] = width, height
+
+    # Space above plot
+    print('\n\n')
+
     # Uncertainties (sigma and 2sigma)
     y1 = np.array([mu[i] + 2 * sigma[i][i] for i in range(len(Xs))]).ravel()
     y2 = np.array([mu[i] - 2 * sigma[i][i] for i in range(len(Xs))]).ravel()

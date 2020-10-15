@@ -1,4 +1,5 @@
 import numpy as np
+from scipy.spatial.distance import cdist
 
 class Kernel(object):
 
@@ -35,11 +36,8 @@ class Kernel(object):
             sigma_f = self.sigma_rbf
             L = self.L_rbf
 
-            Krbf = np.zeros((len(x1), len(x2)))
-
-            for i,x in enumerate(x1):
-                for j,y in enumerate(x2):
-                    Krbf[i,j] = sigma_f**2 * np.exp( - 0.5 * ( ((x - y)/L)**2) )
+            x_sqdist = cdist(x1, x2, 'seuclidean')
+            Krbf = sigma_f**2 * np.exp(- 0.5 * (x_sqdist) / (L**2))
 
         # Periodic kernel
         if self.per:
@@ -47,11 +45,8 @@ class Kernel(object):
             L = self.L_per
             p = self.p_per
 
-            Kper = np.zeros((len(x1), len(x2)))
-            for i,x in enumerate(x1):
-                for j,y in enumerate(x2):
-                    Kper[i,j] = sigma_f**2 
-                    Kper[i,j] *= np.exp( - (2/L**2) * np.sin(np.pi * (x-y)/p)**2 )
+            x_dist = cdist(x1, x2, 'euclidean')
+            Kper = sigma_f**2 * np.exp(-2/(L**2) * np.sin(np.pi * x_dist/p)**2)
 
         # Linear kernel
         if self.lin:
@@ -63,29 +58,49 @@ class Kernel(object):
                 for j,y in enumerate(x2):
                     Klin[i,j] = sigma_f**2 * (x-c) * (y-c)
 
-
-        # return Kper
-        # return Krbf
-        # return np.multiply(Krbf,Kper)
         return Krbf + Kper
 
-def GetPosteriorPredictive(X, Y, Xs, kernel, jitter):
+def optimizerFunction(params, X, Y, Xs):
 
+    jitter, sigma_rbf, L_rbf, sigma_per, L_per, p_per = params
+
+    # RBF kernel - sigma_f, L
+    kernel = Kernel()
+    kernel.addKernel("RBF", sigma_rbf, L_rbf)
+    # kernel.addKernel("RBF", 1, 0.05) # good
+
+    # Periodic kernel - sigma_f, L, p
+    kernel.addKernel("periodic", sigma_per, L_per, p_per)
+
+    mu, sigma, LML = getPosteriorPredictive(X, Y, Xs, kernel, jitter)
+
+    print("LML:", LML)
+
+    return -LML
+
+def getPosteriorPredictive(X, Y, Xs, kernel, jitter):
+
+   # Covariance matrices
     K = kernel(X, X)
     Ks = kernel(X, Xs)
     Kss = kernel(Xs, Xs)
 
+    # Cholesky decomposition
     L = np.linalg.cholesky(K + jitter**2 * np.eye(len(X)))
+   
     Linv = np.linalg.inv(L)
-
-    alpha = np.dot(Linv.T, np.dot(Linv, np.transpose(Y)))
-    mu = np.dot(Ks.T, alpha)
-    
+    alpha = np.dot(Linv.T, np.dot(Linv, Y))
     v = np.dot(Linv, Ks)
+    
+    # Predictive mean and variance
+    mu = np.dot(Ks.T, alpha)
     sigma = Kss - np.dot(v.T, v)
 
-    return (mu, sigma)
+    # Log marginal likelihood
+    LML = float(-0.5 * np.dot(Y.T, alpha) - sum([np.log(L[i,i]) for i in range(len(L))]) - 0.5 * len(X) * np.log(2 * np.pi))
 
-def GetFunctionSample(mu, sigma):
+    return (mu, sigma, LML)
+
+def getFunctionSample(mu, sigma):
     fs = np.random.multivariate_normal(mu, sigma, 1)
     return np.transpose(fs)

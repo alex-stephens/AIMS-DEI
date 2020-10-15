@@ -52,16 +52,15 @@ class Kernel(object):
         if self.lin:
             sigma_f = self.sigma_lin
             c = self.c_lin
-
-            Klin = np.zeros((len(x1), len(x2)))
-            for i,x in enumerate(x1):
-                for j,y in enumerate(x2):
-                    Klin[i,j] = sigma_f**2 * (x-c) * (y-c)
-
+            
+            x_dist = cdist(x1, x2, 'euclidean')
+            Klin = sigma_f**2 * (x1-c).T * (x2-c)
+        
         return Krbf + Kper
 
-def optimizerFunction(params, X, Y, Xs):
-
+def buildKernel(params):
+    
+    # Unpack parameters
     jitter, sigma_rbf, L_rbf, sigma_per, L_per, p_per = params
 
     # RBF kernel - sigma_f, L
@@ -71,6 +70,14 @@ def optimizerFunction(params, X, Y, Xs):
 
     # Periodic kernel - sigma_f, L, p
     kernel.addKernel("periodic", sigma_per, L_per, p_per)
+
+    return kernel
+
+
+def optimizerFunction(params, X, Y, Xs):
+
+    kernel = buildKernel(params)
+    jitter = params[0]
 
     mu, sigma, LML = getPosteriorPredictive(X, Y, Xs, kernel, jitter)
 
@@ -100,7 +107,3 @@ def getPosteriorPredictive(X, Y, Xs, kernel, jitter):
     LML = float(-0.5 * np.dot(Y.T, alpha) - sum([np.log(L[i,i]) for i in range(len(L))]) - 0.5 * len(X) * np.log(2 * np.pi))
 
     return (mu, sigma, LML)
-
-def getFunctionSample(mu, sigma):
-    fs = np.random.multivariate_normal(mu, sigma, 1)
-    return np.transpose(fs)

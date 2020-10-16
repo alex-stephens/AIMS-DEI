@@ -39,6 +39,10 @@ class Kernel(object):
             x_sqdist = cdist(x1, x2, 'seuclidean')
             Krbf = sigma_f**2 * np.exp(- 0.5 * (x_sqdist) / (L**2))
 
+            # Squared euclidean gives nans if given two copies of a single data point
+            if len(x1) == 1:
+                Krbf = [[sigma_f**2]]
+
         # Periodic kernel
         if self.per:
             sigma_f = self.sigma_per
@@ -99,10 +103,6 @@ def getPosteriorPredictive(X, Y, Xs, kernel, jitter):
     K = kernel(X, X)
     Ks = kernel(X, Xs)
     Kss = kernel(Xs, Xs)
-
-    # If Xs is only a single data point, set Kss to zero
-    if len(Xs) == 1:
-        Kss = np.zeros(1)
     
     # Cholesky decomposition
     L = np.linalg.cholesky(K + jitter**2 * np.eye(len(X)))

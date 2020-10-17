@@ -1,5 +1,6 @@
 import numpy as np
 from scipy.spatial.distance import cdist
+from scipy.optimize import minimize
 
 class Kernel(object):
 
@@ -36,7 +37,7 @@ class Kernel(object):
             sigma_f = self.sigma_rbf
             L = self.L_rbf
 
-            x_sqdist = cdist(x1, x2, 'seuclidean')
+            x_sqdist = cdist(x1, x2, 'sqeuclidean')
             Krbf = sigma_f**2 * np.exp(- 0.5 * (x_sqdist) / (L**2))
 
             # Squared euclidean gives nans if given two copies of a single data point
@@ -62,10 +63,10 @@ class Kernel(object):
         
         return Krbf + Kper
 
-def buildKernel(params):
+def buildKernel(params, jitter):
     
     # Unpack parameters
-    jitter, sigma_rbf, L_rbf, sigma_per, L_per, p_per = params
+    sigma_rbf, L_rbf, sigma_per, L_per, p_per = params
 
     # RBF kernel - sigma_f, L
     kernel = Kernel()
@@ -78,10 +79,9 @@ def buildKernel(params):
     return kernel
 
 
-def optimizerFunction(params, X, Y, Xs):
+def optimizerFunction(params, X, Y, Xs, jitter):
 
-    kernel = buildKernel(params)
-    jitter = params[0]
+    kernel = buildKernel(params, jitter)
 
     mu, sigma, LML = getPosteriorPredictive(X, Y, Xs, kernel, jitter)
 
@@ -119,3 +119,14 @@ def getPosteriorPredictive(X, Y, Xs, kernel, jitter):
     LML = float(-0.5 * np.dot(Y.T, alpha) - sum([np.log(L[i,i]) for i in range(len(L))]) - 0.5 * len(X) * np.log(2 * np.pi))
 
     return (mu, sigma, LML)
+
+def truncateData(X, Y, time_cutoff):
+
+        # Truncate the input datasets according to the time cutoff
+    tmax = X[-1]
+    for i in range(len(X)):
+        if X[i]/tmax >= time_cutoff:
+            break
+
+    Xc, Yc = X[:i+1], Y[:i+1]
+    return Xc, Yc

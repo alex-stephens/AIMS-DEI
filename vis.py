@@ -6,7 +6,7 @@ def getFunctionSample(mu, sigma):
     return np.transpose(fs)
 
 
-def plotTides(Xs, mu, sigma, t, y, ttrue, ytrue):
+def plotTides(Xs, mu, sigma, t, y, ttrue, ytrue, time_cutoff=None):
 
     # Plot width and height in inches
     width, height = 10, 5
@@ -27,11 +27,11 @@ def plotTides(Xs, mu, sigma, t, y, ttrue, ytrue):
     pylab.fill_between(Xs.ravel(), y1, y2, linewidth=0, color='orange', alpha=0.2, label='2 SD')
 
     # measurements and truth data
-    pylab.plot(t, y, '.r', label='training data')
     pylab.plot(ttrue, ytrue, '.b', label='test data')
+    pylab.plot(t, y, '.r', label='training data')
 
     # mean function
-    pylab.plot(Xs, mu, '-r', alpha=0.5, label='mean function')
+    pylab.plot(Xs, mu, '-g', alpha=0.5, label='mean function')
 
     # function draws
     draws = 0
@@ -42,7 +42,13 @@ def plotTides(Xs, mu, sigma, t, y, ttrue, ytrue):
     pylab.legend(loc='upper center', ncol=5)
     pylab.xlabel('time (days)')
     pylab.ylabel('tide height (normalised)')
-    yl = 3
+    yl = 5
     pylab.ylim((-yl, yl))
+    # pylab.xlim((4,5))
+
+    # Time cutoff
+    if time_cutoff:
+        pylab.plot(np.array([time_cutoff, time_cutoff])*Xs[-1], [-yl, yl], '--k')
+
 
     pylab.show()

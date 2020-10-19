@@ -5,6 +5,18 @@ import dateutil.parser as dp
 
 
 def loadData():
+    '''
+    Load data from online and store into arrays.
+
+    Arguments:
+        none
+
+    Returns:
+        t (np.array): time values for training data
+        y (np.array): tide height values for training data
+        ttrue (np.array): time values for test data
+        ytrue (np.array): tide height values for test data
+    '''
 
     data_url = 'http://www.robots.ox.ac.uk/~mosb/teaching/AIMS_CDT/sotonmet.txt'
     data = pd.read_csv(data_url)

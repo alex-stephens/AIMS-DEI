@@ -2,11 +2,37 @@ import pylab
 import numpy as np
 
 def getFunctionSample(mu, sigma):
+    '''
+    Sample from a multivariate Gaussian distribution.
+
+    Arguments:
+        mu (np.array, size n): mean vector
+        sigma (np.array, size nxn): covariance matrix
+
+    Returns:
+        fs (np.array, size n): sampled vector
+    '''
     fs = np.random.multivariate_normal(mu, sigma, 1)
     return np.transpose(fs)
 
 
 def plotTides(Xs, mu, sigma, t, y, ttrue, ytrue, time_cutoff=None):
+    '''
+    Visualise the given tide height data and GP predictions..
+
+    Arguments:
+        Xs (np.array, size m): x values to predict for
+        mu (np.array, size n): mean vector
+        sigma (np.array, size nxn): covariance matrix
+        t (np.array): time values for training data
+        y (np.array): tide height values for training data
+        ttrue (np.array): time values for test data
+        ytrue (np.array): tide height values for test data
+        time_cutoff (float): latest time to include in output
+
+    Returns:
+        none
+    '''
 
     # Plot width and height in inches
     width, height = 10, 5

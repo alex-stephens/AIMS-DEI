@@ -3,6 +3,10 @@ from scipy.spatial.distance import cdist
 from scipy.optimize import minimize
 
 class Kernel(object):
+    """
+
+
+    """
 
     def __init__(self):
         self.RBF, self.per, self.lin = False, False, False
@@ -85,8 +89,7 @@ def optimizerFunction(params, X, Y, Xs, jitter):
 
     mu, sigma, LML = getPosteriorPredictive(X, Y, Xs, kernel, jitter)
 
-    print("LML:", LML)
-
+    # print("LML:", LML)
     return -LML
 
 def getRMSE(x1, x2):
@@ -122,7 +125,7 @@ def getPosteriorPredictive(X, Y, Xs, kernel, jitter):
 
 def truncateData(X, Y, time_cutoff):
 
-        # Truncate the input datasets according to the time cutoff
+    # Truncate the input datasets according to the time cutoff
     tmax = X[-1]
     for i in range(len(X)):
         if X[i]/tmax >= time_cutoff:

@@ -13,7 +13,7 @@ def plotTides(Xs, mu, sigma, t, y, ttrue, ytrue, time_cutoff=None):
     pylab.rcParams['figure.figsize'] = width, height
     pylab.rcParams['figure.dpi'] = 100 # for export
     pylab.rcParams.update({'font.size': 22})
-    pylab.rcParams.update({'legend.fontsize': 12})
+    pylab.rcParams.update({'legend.fontsize': 11.8})
 
     # Space above plot
     print('\n\n')
@@ -31,7 +31,7 @@ def plotTides(Xs, mu, sigma, t, y, ttrue, ytrue, time_cutoff=None):
     pylab.plot(t, y, '.r', label='training data')
 
     # mean function
-    pylab.plot(Xs, mu, '-g', alpha=0.5, label='mean function')
+    pylab.plot(Xs, mu, '-g', alpha=0.5, label='mean prediction')
 
     # function draws
     draws = 0
@@ -39,16 +39,22 @@ def plotTides(Xs, mu, sigma, t, y, ttrue, ytrue, time_cutoff=None):
         fs = getFunctionSample(mu, sigma)
         pylab.plot(Xs, fs, color='green', alpha=0.3, label='function draws')
 
-    pylab.legend(loc='upper center', ncol=5)
-    pylab.xlabel('time (days)')
-    pylab.ylabel('tide height (normalised)')
-    yl = 5
+    # Axis limits
+    yl = 3
     pylab.ylim((-yl, yl))
     # pylab.xlim((4,5))
 
+    ncol = 5
+
     # Time cutoff
     if time_cutoff:
-        pylab.plot(np.array([time_cutoff, time_cutoff])*Xs[-1], [-yl, yl], '--k')
+        pylab.plot(np.array([time_cutoff, time_cutoff])*Xs[-1], [-yl, yl], '--k', label='cutoff')
+        ncol = 3
 
+
+    # Labels
+    pylab.legend(loc='upper center', ncol=ncol)
+    pylab.xlabel('time (days)')
+    pylab.ylabel('tide height (normalised)')
 
     pylab.show()

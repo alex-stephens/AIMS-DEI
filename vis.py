@@ -74,7 +74,7 @@ def plotTides(Xs, mu, sigma, t, y, ttrue, ytrue, time_cutoff=None):
 
     # Time cutoff
     if time_cutoff:
-        pylab.plot(np.array([time_cutoff, time_cutoff])*Xs[-1], [-yl, yl], '--k', label='cutoff')
+        pylab.plot(np.array([time_cutoff, time_cutoff])*t[-1], [-yl, yl], '--k', label='cutoff')
         ncol = 3
 
 

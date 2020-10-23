@@ -16,7 +16,7 @@ def getFunctionSample(mu, sigma):
     return np.transpose(fs)
 
 
-def plotTides(Xs, mu, sigma, t, y, ttrue, ytrue, time_cutoff=None):
+def plotTides(Xs, mu, sigma, t, y, ttrue, ytrue, time_cutoff=None, title=None):
     '''
     Visualise the given tide height data and GP predictions..
 
@@ -37,7 +37,7 @@ def plotTides(Xs, mu, sigma, t, y, ttrue, ytrue, time_cutoff=None):
     # Plot width and height in inches
     width, height = 10, 5
     pylab.rcParams['figure.figsize'] = width, height
-    pylab.rcParams['figure.dpi'] = 100 # for export
+    pylab.rcParams['figure.dpi'] = 70 # for export
     pylab.rcParams.update({'font.size': 22})
     pylab.rcParams.update({'legend.fontsize': 11.8})
 
@@ -82,5 +82,6 @@ def plotTides(Xs, mu, sigma, t, y, ttrue, ytrue, time_cutoff=None):
     pylab.legend(loc='upper center', ncol=ncol)
     pylab.xlabel('time (days)')
     pylab.ylabel('tide height (normalised)')
+    if title: pylab.title(title)
 
     pylab.show()

@@ -79,7 +79,7 @@ class Kernel(object):
         
         return Krbf + Kper
 
-def buildKernel(params, jitter):
+def buildKernel(params):
     '''
     Constructs a kernel based on the given parameters. 
 
@@ -105,7 +105,7 @@ def buildKernel(params, jitter):
     return kernel
 
 
-def optimizerFunction(params, X, Y, Xs, jitter):
+def optimizerFunction(params, X, Y, Xs, sigma_n, jitter):
     '''
     Function to pass to scipy.optimize.minimize in order to compute
     the set of hyperparameters that minimises the log marginal likelihood
@@ -116,14 +116,15 @@ def optimizerFunction(params, X, Y, Xs, jitter):
         X (np.array, size n): input data x values 
         Y (np.array, size n): input data y values
         Xs (np.array, size m): x values to predict for
-        jitter (float): additional measurement noise for stability purposes
+        sigma_n (float): measurement noise
+        jitter (float): additional small noise for stability purposes
 
     Returns:
         val (float): negative of the computed LML
     '''
 
-    kernel = buildKernel(params, jitter)
-    mu, sigma, LML = getPosteriorPredictive(X, Y, Xs, kernel, jitter)
+    kernel = buildKernel(params)
+    mu, sigma, LML = getPosteriorPredictive(X, Y, Xs, kernel, sigma_n, jitter)
 
     return -LML
 
@@ -146,7 +147,7 @@ def getRMSE(x1, x2):
 
     return np.sqrt(np.sum(cdist(x1, x2, 'seuclidean')) / len(x1))
 
-def getPosteriorPredictive(X, Y, Xs, kernel, jitter):
+def getPosteriorPredictive(X, Y, Xs, kernel, sigma_n, jitter):
     '''
     Computes the posterior predictive distribution and LML
     for a given set of inputs and parameters.
@@ -170,7 +171,7 @@ def getPosteriorPredictive(X, Y, Xs, kernel, jitter):
     Kss = kernel(Xs, Xs)
     
     # Cholesky decomposition
-    L = np.linalg.cholesky(K + jitter**2 * np.eye(len(X)))
+    L = np.linalg.cholesky(K + (sigma_n**2 + jitter**2) * np.eye(len(X)))
    
     Linv = np.linalg.inv(L)
     alpha = np.dot(Linv.T, np.dot(Linv, Y))

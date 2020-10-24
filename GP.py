@@ -60,10 +60,6 @@ class Kernel(object):
             x_sqdist = cdist(x1, x2, 'sqeuclidean')
             Krbf = sigma_f**2 * np.exp(- 0.5 * (x_sqdist) / (L**2))
 
-            # Squared euclidean gives nans if given two copies of a single data point
-            if len(x1) == 1:
-                Krbf = [[sigma_f**2]]
-
         # Periodic kernel
         if self.per:
             sigma_f = self.sigma_per
@@ -127,10 +123,8 @@ def optimizerFunction(params, X, Y, Xs, jitter):
     '''
 
     kernel = buildKernel(params, jitter)
-
     mu, sigma, LML = getPosteriorPredictive(X, Y, Xs, kernel, jitter)
 
-    # print("LML:", LML)
     return -LML
 
 def getRMSE(x1, x2):
